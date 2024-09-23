@@ -4,3 +4,4 @@ yfinance
 numpy
 pandas
 scipy
+plotly
