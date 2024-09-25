@@ -9,18 +9,17 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f4f4f4;
         }
-        h1 {
+        h1, h2, h3 {
             color: #2c3e50;
+        }
+        h1 {
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
-        }
-        h2 {
-            color: #2980b9;
         }
         ul {
             list-style-type: none;
@@ -50,19 +49,68 @@
         a:hover {
             background-color: #2980b9;
         }
+        .warning {
+            background-color: #fcf8e3;
+            border: 1px solid #faebcc;
+            color: #8a6d3b;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .explanation {
+            background-color: #e8f4fc;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
     <h1>Portfolio Optimization Results</h1>
+    
+    {% if results.insufficient_data %}
+    <div class="warning">
+        <p>Warning: The following stocks have less than 10 years of historical data, which may affect the consistency of the optimization:</p>
+        <ul>
+        {% for stock in results.insufficient_data %}
+            <li>{{ stock }}</li>
+        {% endfor %}
+        </ul>
+        <p>Consider using stocks with at least 10 years of data for more reliable results.</p>
+    </div>
+    {% endif %}
+
     <h2>Optimal Portfolio Weights:</h2>
     <ul>
     {% for weight in results.weights %}
         <li>{{ weight }}</li>
     {% endfor %}
     </ul>
+    
     <p><strong>Expected Annual Return:</strong> {{ results.return }}</p>
     <p><strong>Expected Annual Volatility:</strong> {{ results.volatility }}</p>
     <p><strong>Expected Sharpe Ratio:</strong> {{ results.sharpe }}</p>
+    
+    <div id="chart" style="width:100%;height:1000px;"></div>
+    
+    <div class="explanation">
+        <h3>* Understanding the Portfolio Optimization</h3>
+        <p>The optimized portfolio aims to maximize the Sharpe ratio, which balances return against risk. While it may not always yield the highest return, it offers a better risk-adjusted performance:</p>
+        <ul>
+            <li>The top chart shows cumulative returns over time. The portfolio may not outperform the best individual stock, but it typically has smoother growth.</li>
+            <li>The bottom chart illustrates the risk-return trade-off. The portfolio often sits higher and to the left of most stocks, indicating better risk-adjusted performance.</li>
+            <li>Sharpe ratios provide a measure of risk-adjusted return. A higher Sharpe ratio indicates better risk-adjusted performance.</li>
+        </ul>
+        <p>This balanced approach helps protect against significant losses while still capturing good returns, which is especially valuable in uncertain markets.</p>
+    </div>
+    
     <a href="/">Back to optimizer</a>
+    
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        var graphs = {{results.chart_json | safe}};
+        Plotly.plot('chart', graphs, {});
+    </script>
 </body>
 </html>
